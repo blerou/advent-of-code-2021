@@ -1,17 +1,17 @@
 package day03
 
+import scala.annotation.tailrec
 import scala.io.Source
 
-val sample = Source.fromResource("day03.sample").getLines.toList
-val data = Source.fromResource("day03.txt").getLines.toList
+val sample = Source.fromResource("day03.sample").getLines.toList.map(_.map(bit => if (bit == '1') 1 else 0))
+val data = Source.fromResource("day03.txt").getLines.toList.map(_.map(bit => if (bit == '1') 1 else 0))
 
-val partOne = {
+def partOne = {
   val input = data
   val gamma =
     input
       .foldLeft(Array.fill(input.head.size)(0)) { case (result, line) =>
         line
-          .map(bit => if (bit == '1') 1 else 0)
           .zipWithIndex
           .foldLeft(result) { case (result, (bit, pos)) =>
             result(pos) = result(pos) + bit
@@ -26,7 +26,7 @@ val partOne = {
   // => 4139586
 }
 
-def value(l: List[Int]): Int =
+def value(l: Seq[Int]): Int =
   l.reverse.zipWithIndex.foldLeft(0) { case (v, (bit, exp)) =>
     if (bit == 1)
       v + math.pow(2, exp).toInt
@@ -34,6 +34,42 @@ def value(l: List[Int]): Int =
       v
   }
 
+def partTwo = {
+  val input = data
+  @tailrec
+  def larger(input: Seq[Seq[Int]], grouping: Int): Seq[Int] = {
+    if (input.size == 1)
+      input.head
+    else {
+      val g = input.groupBy(bits => bits(grouping))
+      if (g(1).size >= g(0).size) {
+        larger(g(1), grouping + 1)
+      } else {
+        larger(g(0), grouping + 1)
+      }
+    }
+  }
+  @tailrec
+  def smaller(input: Seq[Seq[Int]], grouping: Int): Seq[Int] = {
+    if (input.size == 1)
+      input.head
+    else {
+      val g = input.groupBy(bits => bits(grouping))
+      if (g(1).size < g(0).size) {
+        smaller(g(1), grouping + 1)
+      } else {
+        smaller(g(0), grouping + 1)
+      }
+    }
+  }
+  val oxygen = larger(input, 0)
+  val co2 = smaller(input, 0)
+
+  println(value(oxygen) * value(co2))
+  // => 1800151
+}
+
 @main def main() = {
   partOne
+  partTwo
 }
