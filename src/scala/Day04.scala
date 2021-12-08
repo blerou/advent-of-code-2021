@@ -59,28 +59,36 @@ object Day04 {
     }
   }
 
-  def partOne = println {
-    val (numbers, boards) = parseInput(data)
+  def winningBoards(numbers: Seq[Int], boards: Seq[Board]) =
     boards
       .flatMap { board =>
         boardWinning(numbers, board) match {
           case Some(numbers) =>
             val nonMatchSum =
               board.filterNot { case (n, _) => numbers.contains(n) }.keys.sum
-//          println(nonMatchSum)
-//          println(numbers.last)
             Some((numbers.size, nonMatchSum * numbers.last))
           case None => None
         }
       }
-      .reduceLeft { case ((r1, s1), (r2, s2)) =>
-        if (r1 <= r2) (r1, s1) else (r2, s2)
-      }
-      ._2
+
+  def partOne = println {
+    val (numbers, boards) = parseInput(data)
+    winningBoards(numbers, boards).reduceLeft { case ((r1, s1), (r2, s2)) =>
+      if (r1 <= r2) (r1, s1) else (r2, s2)
+    }._2
     // => 41503
+  }
+
+  def partTwo = println {
+    val (numbers, boards) = parseInput(data)
+    winningBoards(numbers, boards).reduceLeft { case ((r1, s1), (r2, s2)) =>
+      if (r1 > r2) (r1, s1) else (r2, s2)
+    }._2
+    // => 3178
   }
 
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
