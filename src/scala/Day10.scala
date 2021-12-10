@@ -12,11 +12,13 @@ object Day10 {
     .toList
 
   def partOne = println {
-    data.flatMap(firstIllegalChar(_).map(score)).sum
+    data.flatMap(firstIllegalChar(_).map(illegalScore)).sum
     // => 339477
   }
 
-  def firstIllegalChar(line: String): Option[Char] = {
+  type Stack = List[Char]
+
+  def parseLine(line: String): (Stack, Option[Char]) = {
     val pair = Map(
       ')' -> '(',
       ']' -> '[',
@@ -38,17 +40,46 @@ object Day10 {
             (c +: stack, None)
           }
       }
-      ._2
   }
 
-  val score = Map(
+  def firstIllegalChar(line: String): Option[Char] =
+    parseLine(line)._2
+
+  val illegalScore = Map(
     ')' -> 3,
     ']' -> 57,
     '}' -> 1197,
     '>' -> 25137
   )
 
+  def partTwo = println {
+    val scores = data
+      .map(parseLine)
+      .flatMap {
+        case (stack, None) =>
+          Some(autocompleteScoring(stack))
+        case (_, Some(_)) =>
+          None
+      }
+      .sorted
+    scores(scores.size / 2)
+    // => 3049320156
+  }
+
+  def autocompleteScoring(stack: Stack): Long =
+    stack.foldLeft(0L) { case (result, c) =>
+      result * 5 + autocompleteScore(c)
+    }
+
+  val autocompleteScore = Map(
+    '(' -> 1,
+    '[' -> 2,
+    '{' -> 3,
+    '<' -> 4
+  )
+
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
