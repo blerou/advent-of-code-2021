@@ -47,6 +47,37 @@ object Day12 {
     // => 3576
   }
 
+  def partTwo = println {
+    val input = data
+    val caves = input.flatMap(parseLine).groupMap(_._1)(_._2)
+    @tailrec
+    def loop(paths: Set[Trail], candidates: Set[Trail]): Set[Trail] =
+      if (candidates.isEmpty)
+        paths
+      else {
+        val (done, ongoing) = candidates
+          .flatMap { trail =>
+            val tc = trail
+              .filter(_.forall(_.isLower))
+              .groupBy(identity)
+              .view
+              .mapValues(_.size)
+              .toMap
+            caves(trail.head)
+              .filter { cave =>
+                val noTwoVisits = tc.forall { case (cave, cnt) => cnt <= 1 }
+                val noVisit = !tc.contains(cave)
+                cave.forall(_.isUpper) || noTwoVisits || noVisit
+              }
+              .map(_ +: trail)
+          }
+          .partition(_.head == "end")
+        loop(paths ++ done, ongoing)
+      }
+    loop(Set.empty, caves("start").map(List(_)).toSet).size
+    // => 84271
+  }
+
   type Cave = String
   type Path = (Cave, Cave)
   type Trail = Seq[Cave]
@@ -60,5 +91,6 @@ object Day12 {
 
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
