@@ -21,22 +21,42 @@ object Day06 {
     val newPopulation = (0 until days).foldLeft(population) { case (pop, _) =>
       afterDay(pop)
     }
-//    println(s"final: $newPopulation")
-    newPopulation.size
+    newPopulation.values.sum
     // => 391671
   }
 
   type Age = Int
-  def parseInput(lines: Seq[String]): Seq[Age] =
-    lines.head.split(",").map(_.toInt).toList
+  def parseInput(lines: Seq[String]): Map[Age, Long] =
+    lines.head
+      .split(",")
+      .map(_.toInt)
+      .groupBy(identity)
+      .map { case (age, as) => (age, as.length.toLong) }
+      .toMap
 
-  def afterDay(population: Seq[Age]): Seq[Age] =
-    population.flatMap { age =>
-      if (age > 0) List(age - 1)
-      else List(6, 8)
+  def afterDay(population: Map[Age, Long]): Map[Age, Long] =
+    population.foldLeft(Map.empty) { case (result, (age, n)) =>
+      if (age > 0)
+        result.updatedWith(age - 1)(_.map(_ + n).orElse(Some(n)))
+      else
+        result
+          .updatedWith(6)(_.map(_ + n).orElse(Some(n)))
+          .updated(8, n)
     }
+
+  def partTwo = println {
+    val input = data
+    val population = parseInput(input)
+    val days = 256
+    val newPopulation = (0 until days).foldLeft(population) { case (pop, _) =>
+      afterDay(pop)
+    }
+    newPopulation.foldLeft(0L)(_ + _._2)
+    // => 1754000560399
+  }
 
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
