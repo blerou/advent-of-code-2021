@@ -63,7 +63,17 @@ object Day13 {
       }
       .mkString("\n")
 
+  def partTwo = println {
+    val input = data
+    val (coords, folds) = parseInput(input)
+    val newCoords = folds.foldLeft(coords)(fold)
+    println(s"first fold:\n${draw(newCoords)}")
+    newCoords.size
+    // => HKUJGAJZ
+  }
+
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
