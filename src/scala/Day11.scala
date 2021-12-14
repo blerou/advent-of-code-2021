@@ -29,11 +29,12 @@ object Day11 {
     val steps = 100
     val (newGrid, flashes) = (0 until steps).foldLeft((grid, 0L)) {
       case ((grid, flashes), _) =>
-        println(draw(grid))
-        val (newGrid, extraFlashes) = step(grid)
+//        println(draw(grid))
+        val newGrid = step(grid)
+        val extraFlashes = newGrid.count(_._2 == 0)
         (newGrid, flashes + extraFlashes)
     }
-    println(draw(newGrid))
+//    println(draw(newGrid))
     flashes
     // => 1747
   }
@@ -50,12 +51,11 @@ object Day11 {
     pairs.toMap
   }
 
-  def step(grid: Grid): (Grid, Long) = {
+  def step(grid: Grid): Grid = {
     val improvedGrid = grid.map { case (o, e) => (o, e + 1) }
     val flashedGrid = flashIt(improvedGrid, Set.empty)
-    val flashes = flashedGrid.count(_._2 > 9)
     val zerodGrid = flashedGrid.map { case (o, e) => (o, if (e > 9) 0 else e) }
-    (zerodGrid, flashes)
+    zerodGrid
   }
 
   @tailrec
@@ -100,7 +100,27 @@ object Day11 {
       }
       .mkString("", "\n", "\n")
 
+  def partTwo = println {
+    val input = data
+    val grid = parseGrid(input)
+    fullFlash(grid, 0)
+    // => 505
+  }
+
+  @tailrec
+  def fullFlash(grid: Grid, steps: Int): Int = {
+    if (grid.forall(_._2 == 0))
+      steps
+    else {
+      fullFlash(
+        step(grid),
+        steps + 1
+      )
+    }
+  }
+
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
