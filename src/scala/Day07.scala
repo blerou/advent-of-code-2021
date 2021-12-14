@@ -20,6 +20,18 @@ object Day07 {
     // => 336721
   }
 
+  def partTwo = println {
+    val input = data
+    val crabPos = parseInput(input)
+    val bestPosBase = crabPos.sum * 1.0 / crabPos.size
+    fuelTo(crabPos, math.floor(bestPosBase).toInt) min
+      fuelTo(crabPos, math.ceil(bestPosBase).toInt)
+    // => 91638945
+  }
+
+  def fuelTo(crabPos: Seq[CrabPos], candidate: CrabPos): Int =
+    crabPos.map(p => (0 to math.abs(p - candidate)).sum).sum
+
   type CrabPos = Int
   def parseInput(lines: Seq[String]): Seq[CrabPos] =
     lines.head
@@ -29,5 +41,6 @@ object Day07 {
 
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
