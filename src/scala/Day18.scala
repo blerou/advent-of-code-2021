@@ -66,42 +66,16 @@ object Day18 {
   def partOne = println {
     val input = data
     val snums = parseInput(input)
-    val snum = snums.reduce { case (a, b) =>
-      val added = a + b
-//      println(s"added: $added")
-      val reduced = reduce(added)
-//      println(s"reduced: $reduced")
-      reduced
-    }
+    val snum = snums.reduce { case (a, b) => a + b }
     snum.magnitude
     // => 4457
   }
 
-  def reduce(sn: Snum): Snum = {
-    @tailrec
-    def loop(originalNumber: Snum, newNumber: Option[Snum]): Snum = {
-      if (newNumber.isEmpty)
-        originalNumber
-      else {
-        val newOrig = newNumber.get
-        val newerNumber =
-          newNumber
-            .map(_.explode)
-            .flatMap(num => if (num != newOrig) Some(num) else None)
-            .orElse(
-              newNumber
-                .map(_.split)
-                .flatMap(num => if (num != newOrig) Some(num) else None)
-            )
-        loop(newNumber.get, newerNumber)
-      }
-    }
-    loop(sn, Some(sn))
-  }
-
   case class Snum(value: IndexedSeq[Rnum]) {
 
-    def +(other: Snum) =
+    def +(other: Snum) = add(other).reduce
+
+    def add(other: Snum) =
       Snum(value.map(_.added) ++ other.value.map(_.added))
 
     private def magnitudeOne = {
@@ -180,6 +154,29 @@ object Day18 {
           .getOrElse(value)
       Snum(newValue)
     }
+
+    def reduce: Snum = {
+      @tailrec
+      def loop(originalNumber: Snum, newNumber: Option[Snum]): Snum = {
+        if (newNumber.isEmpty)
+          originalNumber
+        else {
+          val newOrig = newNumber.get
+          val newerNumber =
+            newNumber
+              .map(_.explode)
+              .flatMap(num => if (num != newOrig) Some(num) else None)
+              .orElse(
+                newNumber
+                  .map(_.split)
+                  .flatMap(num => if (num != newOrig) Some(num) else None)
+              )
+          loop(newNumber.get, newerNumber)
+        }
+      }
+      loop(this, Some(this))
+    }
+
   }
 
   case class Rnum(value: Int, depth: Int) {
@@ -210,7 +207,20 @@ object Day18 {
     Snum(value)
   }
 
+  def partTwo = println {
+    val input = data
+    val snums = parseInput(input)
+    val magnitudes = for {
+      s1 <- snums
+      s2 <- snums
+      if s1 != s2
+    } yield (s1 + s2).magnitude
+    magnitudes.max
+    // => 4784
+  }
+
   def main(args: Array[String]) = {
     partOne
+    partTwo
   }
 }
